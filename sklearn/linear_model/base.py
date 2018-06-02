@@ -59,7 +59,11 @@ def make_dataset(X, y, sample_weight, random_state=None):
     if sp.issparse(X):
         dataset = CSRDataset(X.data, X.indptr, X.indices, y, sample_weight,
                              seed=seed)
-        intercept_decay = SPARSE_INTERCEPT_DECAY
+        density = X.nnz / (X.shape[0] * X.shape[1])
+        if density > SPARSE_INTERCEPT_DECAY:
+            intercept_decay = density
+        else:
+            intercept_decay = SPARSE_INTERCEPT_DECAY
     else:
         dataset = ArrayDataset(X, y, sample_weight, seed=seed)
         intercept_decay = 1.0
