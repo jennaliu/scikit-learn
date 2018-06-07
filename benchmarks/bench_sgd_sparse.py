@@ -15,7 +15,7 @@ parser.add_argument('-i', '--intercept', type=float, default=100)
 result = parser.parse_args()
 
 density = result.density
-# SGD on csr_matrix fits poorly when absolute value of itercept is big
+# SGD on csr_matrix fits poorly when the absolute value of the intercept is big
 intercept = result.intercept
 
 n_samples, n_features = 5000, 300
