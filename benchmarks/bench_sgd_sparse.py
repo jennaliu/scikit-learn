@@ -1,5 +1,7 @@
+import argparse
+
 import numpy as np
-from scipy.sparse import random
+from scipy import sparse
 from scipy.sparse.csr import csr_matrix
 from sklearn.linear_model.stochastic_gradient import SGDRegressor
 from sklearn.linear_model import Ridge
@@ -7,17 +9,26 @@ from sklearn.metrics import r2_score
 
 np.random.seed(42)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--density', type=float, default=0.01)
+parser.add_argument('-i', '--intercept', type=float, default=100)
+result = parser.parse_args()
+
+density = result.density
+# SGD on csr_matrix fits poorly when absolute value of itercept is big
+intercept = result.intercept
 
 n_samples, n_features = 5000, 300
-density = 0.1
-X = random(n_samples, n_features, density=density).A
-print("input data sparsity: %f" % density)
+
+print("input data density: %f" % density)
+print("intercept: %f" % intercept)
+
+X = sparse.random(n_samples, n_features, density=density).A
 coef = 3 * np.random.randn(n_features)
-intercept = 3 * np.random.randn(n_samples)
 y = np.dot(X, coef) + intercept
 
 # add noise
-y += 0.01 * np.random.normal((n_samples,))
+y += 0.01 * np.random.randn()
 
 # Split data in train set and test set
 n_samples = X.shape[0]
@@ -27,6 +38,7 @@ X_test, y_test = X[n_samples // 2:], y[n_samples // 2:]
 
 ###############################################################################
 def benchmark(clf, X_train, X_test, case):
+    print("-" * 50)
     clf.fit(X_train, y_train)
 
     y_pred = clf.predict(X_train)
